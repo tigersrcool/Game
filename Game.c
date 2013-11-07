@@ -5,7 +5,8 @@
  *      Author: C15Kirsten.Larson
  */
 
-#include "LCD_Driver/LCD_Driver.h"
+#include "Game.h"
+#include "LCD_Driver/LCD_Driver.h"		//used C2C Bentley's library
 
 
 unsigned char initPlayer(){
@@ -24,9 +25,13 @@ void clearPlayer(unsigned char player){
 
 unsigned char movePlayer(unsigned char player, unsigned char direction){
 	switch (direction) {
-	//
-	// update player position based on direction of movement
-	//
+		case RIGHT:
+			player = player + 1;
+			break;
+
+		case LEFT:
+			player = player - 1;
+			break;
 	}
 	return player;
 }char

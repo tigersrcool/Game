@@ -12,6 +12,7 @@
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
+
 #define ROW_MASK 0x40
 #define NUM_MINES 2
 
@@ -29,6 +30,7 @@ unsigned char movePlayer(unsigned char player, unsigned char direction);
 
 // Returns true if the position passed in is the winning game position.
 char didPlayerWin(unsigned char player);
+
 /* * Functions which may prove useful in achieving A-Functionality.
  * char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]);
  * void generateMines(unsigned char mines[NUM_MINES]);
