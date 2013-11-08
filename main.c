@@ -22,12 +22,13 @@ void init_LCD();
 int main(void) {
 	WDTCTL = (WDTPW | WDTHOLD);
 
-	unsigned char position = initPlayer();
-
 	init_timer();
 	init_buttons();
 	init_LCD();
 	__enable_interrupt();
+
+	unsigned char position = initPlayer();
+	printPlayer(position);
 
 	while (1) {
 
@@ -37,29 +38,25 @@ int main(void) {
 
 			if (isP1ButtonPressed(BIT1)) {
 				direction = RIGHT;
-				movePlayer(position, RIGHT);
-				TAR = 1;
+				position = movePlayer(position, RIGHT);
 				flag = 0;
 			}
 
 			if (isP1ButtonPressed(BIT2)) {
 				direction = LEFT;
 				movePlayer(position, LEFT);
-				TAR = 1;
 				flag = 0;
 			}
 
 			if (isP1ButtonPressed(BIT3)) {
 				direction = UP;
 				movePlayer(position, UP);
-				TAR = 1;
 				flag = 0;
 			}
 
 			if (isP1ButtonPressed(BIT4)) {
 				direction = DOWN;
 				movePlayer(position, DOWN);
-				TAR = 1;
 				flag = 0;
 			}
 			while (ENDGAME){

@@ -5,9 +5,10 @@
  *      Author: C15Kirsten.Larson
  */
 
+#include <msp430.h>
 #include "Game.h"
-#include "LCD_Driver/LCD_Driver.h"		//used C2C Bentley's library
-
+#include "buttons/button.h"
+#include "LCD_Driver/LCD_Driver.h"
 
 unsigned char initPlayer(){
 	return 0x80;
@@ -26,7 +27,13 @@ void clearPlayer(unsigned char player){
 unsigned char movePlayer(unsigned char player, unsigned char direction){
 	switch (direction) {
 		case RIGHT:
+			clearPlayer(player);
 			player = player + 1;
+			if (player==0x88){
+				player = 0xC0;
+			}
+			printPlayer(player);
+			waitForP1ButtonRelease(BIT1);
 			break;
 
 		case LEFT:
