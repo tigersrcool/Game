@@ -8,12 +8,15 @@
 
 char* Loser1 = "Game";
 char* Loser2 = "Over";
+char* Winner1 = "You";
+char* Winner2 = "Win!!!";
 char flag = 0;
 int direction = 0;
 int playing = 1;
 int ENDGAME = 0;
 char buttons[] = { BIT1, BIT2, BIT3, BIT4 };
 char pressedButton = 0;
+char WINNER = 0;
 
 void init_timer();
 void init_buttons();
@@ -58,53 +61,70 @@ int main(void) {
 				position = movePlayer(position, DOWN);
 				flag = 0;
 			}
-			while (ENDGAME) {
+
+			WINNER = didPlayerWin(position);
+			while (WINNER) {
 				LCDclear();
-				writeString(Loser1);
+				writeString(Winner1);
 				setCursorLine2();
-				writeString(Loser2);
+				writeString(Winner2);
 				pressedButton = pollP1Buttons(buttons, 4);	//checks reset
 				while (pressedButton) {
 					LCDclear();
 					position = initPlayer();
 					printPlayer(position);
 					pressedButton = 0;
-					ENDGAME = 0;
+					WINNER = 0;
 				}
 			}
 
+		while (ENDGAME) {
+			LCDclear();
+			writeString(Loser1);
+			setCursorLine2();
+			writeString(Loser2);
+			pressedButton = pollP1Buttons(buttons, 4);	//checks reset
+			while (pressedButton) {
+				LCDclear();
+				position = initPlayer();
+				printPlayer(position);
+				pressedButton = 0;
+				ENDGAME = 0;
+			}
 		}
+
 	}
-	return 0;
+}
+return 0;
 }
 
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR() {
-	TACTL &= ~TAIFG;            // clear interrupt flag
-	flag = flag + 1;
-	if (flag == 4) {				//checks 2 sec time limit
-		ENDGAME = 1;//Decided to put it in here after looking at C2C Taormina's code
-	}
+TACTL &= ~TAIFG;            // clear interrupt flag
+flag = flag + 1;
+if (flag == 4) {				//checks 2 sec time limit
+	ENDGAME = 1;//Decided to put it in here after looking at C2C Taormina's code
+}
 }
 
 void init_timer() {
-	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
-	TACTL &= ~(MC1 | MC0);      // stop timer
-	TACTL |= TACLR;             // clear TAR
-	TACTL |= TASSEL1;   // configure for SMCLK - what's the frequency (roughly)?
-	TACTL |= ID1 | ID0; // divide clock by 8 - what's the frequency of interrupt?
-	TACTL &= ~TAIFG;            // clear interrupt flag
-	TACTL |= MC1;               // set count mode to continuous
-	TACTL |= TAIE;              // enable interrupt
+WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+TACTL &= ~(MC1 | MC0);      // stop timer
+TACTL |= TACLR;             // clear TAR
+TACTL |= TASSEL1;   // configure for SMCLK - what's the frequency (roughly)?
+TACTL |= ID1 | ID0; // divide clock by 8 - what's the frequency of interrupt?
+TACTL &= ~TAIFG;            // clear interrupt flag
+TACTL |= MC1;               // set count mode to continuous
+TACTL |= TAIE;              // enable interrupt
 }
 
 void init_buttons() {
-	configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
+configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
 }
 
 void init_LCD() {
-	initSPI();
-	initLCD();
-	LCDclear();
+initSPI();
+initLCD();
+LCDclear();
 }
 
