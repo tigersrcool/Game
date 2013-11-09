@@ -21,6 +21,9 @@ Timer Interrupt
   as soon as a button is pushed, counts up to 2 seconds; if button is pushed while counting it clears; if button isn't pushed int ENDGAME=1
 Button Interrupt
   uses testAndRespondToButtonPush function and interrupts if a button is pushed
+Additional Libraries
+====
+Makes use of Button Library and LCD Library
 License
 ====
 Anyone is free to use and modify this for any purpose
