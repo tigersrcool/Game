@@ -18,6 +18,7 @@ int ENDGAME = 0;
 char buttons[] = { BIT1, BIT2, BIT3, BIT4 };
 char pressedButton = 0;
 char WINNER = 0;
+int start = 1;
 
 void init_timer();
 void init_buttons();
@@ -39,36 +40,38 @@ int main(void) {
 		while (playing) {
 
 //looked at C2C Busho's code to get an idea of how I could handle the buttons
-			if (isP1ButtonPressed(BIT1)) {
-				direction = BIT1;
-				position = movePlayer(position, direction);	//had to look at C2C Busho's code to realize movePlayer() needed to equal position
-				flag = 0;
-			}
+//			if (isP1ButtonPressed(BIT1)) {
+//				direction = BIT1;
+//				position = movePlayer(position, direction);	//had to look at C2C Busho's code to realize movePlayer() needed to equal position
+//				flag = 0;
+//			}
 
-			if (isP1ButtonPressed(BIT2)) {
-				direction = BIT2;
-				position = movePlayer(position, direction);
-				flag = 0;
-			}
+//			if (isP1ButtonPressed(BIT2)) {
+//				direction = BIT2;
+//				position = movePlayer(position, direction);
+//				flag = 0;
+//			}
 
-			if (isP1ButtonPressed(BIT3)) {
-				direction = BIT3;
-				position = movePlayer(position, direction);
-				flag = 0;
-			}
+//			if (isP1ButtonPressed(BIT3)) {
+//				direction = BIT3;
+//				position = movePlayer(position, direction);
+//				flag = 0;
+//			}
 
-			if (isP1ButtonPressed(BIT4)) {
-				direction = BIT4;
-				position = movePlayer(position, direction);
-				flag = 0;
-			}
+//			if (isP1ButtonPressed(BIT4)) {
+//				direction = BIT4;
+//				position = movePlayer(position, direction);
+//				flag = 0;
+//			}
 
-			WINNER = didPlayerWin(position);
+//			WINNER = didPlayerWin(position);
 			while (WINNER) {
 				LCDclear();
 				writeString(Winner1);
 				setCursorLine2();
 				writeString(Winner2);
+				waitForP1ButtonRelease(BIT1);
+				waitForP1ButtonRelease(BIT4);
 				pressedButton = pollP1Buttons(buttons, 4);	//checks reset
 				while (pressedButton) {
 					LCDclear();
@@ -107,37 +110,37 @@ __interrupt void TIMER0_A1_ISR() {
 	}
 }
 
-//#pragma vector=PORT1_VECTOR
-//__interrupt void Port1_ISR(void) {
-//	testAndRespondToButtonPush(BIT1);
-//	testAndRespondToButtonPush(BIT2);
-//	testAndRespondToButtonPush(BIT3);
-//	testAndRespondToButtonPush(BIT4);
-//}
+#pragma vector=PORT1_VECTOR
+__interrupt void Port1_ISR(void) {
+	testAndRespondToButtonPush(BIT1);
+	testAndRespondToButtonPush(BIT2);
+	testAndRespondToButtonPush(BIT3);
+	testAndRespondToButtonPush(BIT4);
+}
 
-//void testAndRespondToButtonPush(char buttonToTest) {
-//	if (buttonToTest & P1IFG) {
-//		if (buttonToTest & P1IES) {
-//			clearPlayer(position);
-//			position = movePlayer(position, buttonToTest);
-//			printPlayer(position);
-//			flag = 0;
-//			TACTL |= TACLR;
-//		} else {
-//			debounce();
-//		}
-
-//		P1IES ^= buttonToTest;
-//		P1IFG &= ~buttonToTest;
-//	}
-//}
+void testAndRespondToButtonPush(char buttonToTest) {
+	if (buttonToTest & P1IFG) {
+		if (buttonToTest & P1IES) {
+			clearPlayer(position);
+			position = movePlayer(position, buttonToTest);
+			printPlayer(position);
+			WINNER = didPlayerWin(position);
+			flag = 0;
+			TACTL |= TACLR;
+		} else {
+			debounce();
+		}
+		P1IES ^= buttonToTest;
+		P1IFG &= ~buttonToTest;
+	}
+}
 
 void init_timer() {
 	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
 	TACTL &= ~(MC1 | MC0);      // stop timer
 	TACTL |= TACLR;             // clear TAR
-	TACTL |= TASSEL1;   // configure for SMCLK - what's the frequency (roughly)?
-	TACTL |= ID1 | ID0; // divide clock by 8 - what's the frequency of interrupt?
+	TACTL |= TASSEL1;   		// configure for SMCLK - what's the frequency (roughly)?
+	TACTL |= ID1 | ID0; 		// divide clock by 8 - what's the frequency of interrupt?
 	TACTL &= ~TAIFG;            // clear interrupt flag
 	TACTL |= MC1;               // set count mode to continuous
 	TACTL |= TAIE;              // enable interrupt
@@ -145,6 +148,9 @@ void init_timer() {
 
 void init_buttons() {
 	configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
+	P1IES |= BIT1|BIT2|BIT3|BIT4;		//Looked at C2C Taormina's code to realize I needed to do these last three lines to make the interrupt work.
+	P1IFG &= ~(BIT1|BIT2|BIT3|BIT4);
+	P1IE |= BIT1|BIT2|BIT3|BIT4;
 }
 
 void init_LCD() {
